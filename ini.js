@@ -25,14 +25,19 @@ function encode (obj, opt) {
   var separator = opt.whitespace ? ' = ' : '='
 
   Object.keys(obj).forEach(function (k, _, __) {
-    var val = obj[k]
+    var val = obj[k]     
     if (val && Array.isArray(val)) {
       val.forEach(function (item) {
-        out += safe(k + '[]') + separator + safe(item) + '\n'
+        out += isComment (item)
+                ? item + eol
+                : safe(k + '[]') + separator + safe(item) + '\n'
       })
     } else if (val && typeof val === 'object') {
-      children.push(k)
-    } else {
+      children.push(k)    
+    } else if (isComment (val)) {
+      out += val + eol      
+    }
+    else {
       out += safe(k) + separator + safe(val) + eol
     }
   })
@@ -191,4 +196,9 @@ function unsafe (val, doUnesc) {
     return unesc.trim()
   }
   return val
+}
+
+function isComment (val) {
+  var hashtag = typeof val === 'string' ? val.charAt(0) : false
+  return hashtag && (hashtag === '#' || hashtag === ';')
 }
